@@ -12,7 +12,7 @@ st.title("AI Based Mercury Concentration Detection")
 st.write("Upload a fluorescence image to predict Mercury concentration.")
 
 # Load model
-model = load_model("best_mercury_model.pth")
+model = load_model("best_mercury_model1.pth")
 
 # Load class labels
 classes = ['0', '10', '50', '100', '150', '200', '250']
@@ -40,4 +40,4 @@ if uploaded_file is not None:
 
         concentration = classes[pred.item()]
 
-    st.success(f"Predicted Mercury Concentration: {concentration} µM")
+    st.success(f"Predicted Mercury Concentration: {concentration} mM")
