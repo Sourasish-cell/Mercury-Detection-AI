@@ -15,7 +15,8 @@ st.write("Upload a fluorescence image to predict Mercury concentration.")
 model = load_model("best_mercury_model1.pth")
 
 # Load class labels
-classes = ['0', '10', '50', '100', '150', '200', '250']
+with open("classes.txt") as f:
+    classes = [line.strip() for line in f.readlines()]
 
 # Image transform
 transform = transforms.Compose([
@@ -40,4 +41,9 @@ if uploaded_file is not None:
 
         concentration = classes[pred.item()]
 
-    st.success(f"Predicted Mercury Concentration: {concentration} mM")
+    
+    prob = torch.nn.functional.softmax(outputs, dim=1)
+    confidence = prob[0][pred.item()].item()*100
+
+    st.success(f"Predicted Mercury Concentration: {concentration}")
+    st.write(f"Confidence: {confidence:.2f}%")
