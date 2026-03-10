@@ -1,7 +1,7 @@
 C Dots
 Hg 10 mM
-Hg 50 mM
 Hg 100 mM
 Hg 150 mM
 Hg 200 mM
 Hg 250 mM
+Hg 50 mM
