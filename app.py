@@ -34,11 +34,11 @@ metal = st.selectbox(
 # Load model + classes
 # -------------------------
 if metal == "Mercury (Hg)":
-    model = load_model("best_mercury_model1.pth")
+    model = load_model("mercury_model.pth")
     class_names = load_classes("mercury_classes.txt")
 
 else:
-    model = load_model("best_zinc_model1.pth")
+    model = load_model("zinc_model.pth")
     class_names = load_classes("classes.txt")
 
 
