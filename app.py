@@ -2,30 +2,64 @@ import streamlit as st
 import torch
 from torchvision import transforms
 from PIL import Image
-import numpy as np
+
 from model import load_model
 
-# Page settings
-st.set_page_config(page_title="Mercury Detection AI", layout="centered")
+# -------------------------
+# Load classes from file
+# -------------------------
+def load_classes(file_path):
+    with open(file_path, "r") as f:
+        return [line.strip() for line in f.readlines()]
 
-st.title("AI Based Mercury Concentration Detection")
-st.write("Upload a fluorescence image to predict Mercury concentration.")
 
-# Load model
-model = load_model("best_mercury_model.pth")
+st.title("AI-Based Heavy Metal Detection System")
 
-# Load class labels
-classes = ['0', '10', '50', '100', '150', '200', '250']
+st.write("""
+Upload a fluorescence image and select the metal type.
+The model predicts concentration based on fluorescence quenching.
+""")
 
-# Image transform
+
+# -------------------------
+# Metal selection
+# -------------------------
+metal = st.selectbox(
+    "Select Metal",
+    ["Mercury (Hg)", "Zinc (Zn)"]
+)
+
+
+# -------------------------
+# Load model + classes
+# -------------------------
+if metal == "Mercury (Hg)":
+    model = load_model("best_mercury_model1.pth")
+    class_names = load_classes("mercury_classes.txt")
+
+else:
+    model = load_model("best_zinc_model1.pth")
+    class_names = load_classes("classes.txt")
+
+
+# -------------------------
+# Upload image
+# -------------------------
+uploaded_file = st.file_uploader(
+    "Upload Fluorescence Image",
+    type=["jpg", "png", "jpeg"]
+)
+
 transform = transforms.Compose([
     transforms.Resize((224,224)),
     transforms.ToTensor()
 ])
 
-uploaded_file = st.file_uploader("Upload Fluorescent Image", type=["png","jpg","jpeg"])
 
-if uploaded_file is not None:
+# -------------------------
+# Prediction
+# -------------------------
+if uploaded_file:
 
     image = Image.open(uploaded_file).convert("RGB")
 
@@ -34,10 +68,16 @@ if uploaded_file is not None:
     img = transform(image).unsqueeze(0)
 
     with torch.no_grad():
-
         outputs = model(img)
-        _, pred = torch.max(outputs,1)
+        probs = torch.softmax(outputs, dim=1)
 
-        concentration = classes[pred.item()]
+        pred = torch.argmax(probs, dim=1).item()
+        confidence = probs[0][pred].item()
 
-    st.success(f"Predicted Mercury Concentration: {concentration} µM")
+    st.success(f"Predicted: **{class_names[pred]}**")
+    st.info(f"Confidence: {confidence * 100:.2f}%")
+
+    st.subheader("Prediction Probabilities")
+
+    for i, cls in enumerate(class_names):
+        st.write(f"{cls}: {probs[0][i].item():.2f}")
